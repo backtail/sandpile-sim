@@ -17,4 +17,4 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 - run the program in release mode and enjoy the patterns
 
 ### Known issues
--[ ] currently only Windows file system supported (other coming soon) -> Solution: Modify the path variable yourself!
+- [ ] currently only Windows file system supported (other coming soon) -> Solution: Modify the path variable yourself!
