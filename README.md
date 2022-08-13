@@ -10,6 +10,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 `git clone` this repository then `cargo run --release` on main branch for optimal performance
 
 ### How to use
-- choose a `num_grains` (in release mode, everything under 10000 will be calculated under a second)
-- choose a `side_length` of the display square (experiment a little, 75 works for 10000 grains)
+- choose number of grains to start with by passing `-n` (in release mode, everything under 10000 will be calculated under a second)
+- choose side length of the displayed square with `-l` (experiment a little, 75 works for 10000 grains)
+- (pass `--help` to see all available options, or pass nothing to go with the default values)
 - run the program in release mode and enjoy the patterns
