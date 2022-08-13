@@ -1,6 +1,8 @@
 # Sandpile Sim
 Implements the sandpile algorithm and prints the output into the console! (for now)
 
+![Example output (n=420, l=17)](pictures/sandpile_example_small.jpg)
+
 ### Install Rust
 To download Rustup and install Rust, run the following in your terminal, then follow the on-screen instructions. See ["Other Installation Methods"](https://forge.rust-lang.org/infra/other-installation-methods.html) if you are on Windows.
 ```bash
@@ -14,3 +16,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 - choose side length of the displayed square with `-l` (experiment a little, 75 works for 10000 grains)
 - (pass `--help` to see all available options, or pass nothing to go with the default values)
 - run the program in release mode and enjoy the patterns
+
+#### Example:
+`cargo run --release -- -n 4200 -l 49`
