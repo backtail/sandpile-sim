@@ -1,12 +1,29 @@
 pub mod sandpile;
 use sandpile::Sandpile;
+use clap::Parser;
+
+// Structure representing the command line arguments
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+struct Args {
+   /// Name of the person to greet
+   #[clap(short, long, value_parser, default_value_t = 10_000)]
+   num_grains: usize,
+
+   /// Number of times to greet
+   #[clap(short, long, value_parser, default_value_t = 75)]
+   len_sides: usize,
+}
 
 fn main() {
-    // choose a grain amount
-    let num_grains: usize = 10_000;
+    // Parse command line arguments
+    let args = Args::parse();
 
-    // guess a size for that amount of grains
-    let side_length: usize = 75;
+    // Get side length
+    let side_length = args.len_sides;
+    
+    // Get number of grains to start with
+    let num_grains = args.num_grains;
 
     // find middle of the grid
     let middle_point = (side_length - 1) / 2;
