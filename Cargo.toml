@@ -10,4 +10,5 @@ toodee = "0.3.0"
 colored = "2.0.0"
 clap = { version = "3.2.17", features = ["derive"] }
 png = "0.17.5"
+rand = "0.8.5"
 

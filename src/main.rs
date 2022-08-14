@@ -1,21 +1,26 @@
 pub mod output;
 pub mod sandpile;
 
+use clap::Parser;
 use output::{create_png, raw_data_to_rgba};
 use sandpile::Sandpile;
-use clap::Parser;
+use std::process;
 
 // Structure representing the command line arguments
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
-   /// Name of the person to greet
-   #[clap(short, long, value_parser, default_value_t = 10_000)]
-   num_grains: usize,
+    // number of grains
+    #[clap(short, long, value_parser, default_value_t = 10_000)]
+    num_grains: usize,
 
-   /// Number of times to greet
-   #[clap(short, long, value_parser, default_value_t = 75)]
-   len_sides: usize,
+    // image side length
+    #[clap(short, long, value_parser, default_value_t = 75)]
+    len_sides: usize,
+
+    // probability parameter
+    #[clap(short, long, value_parser, default_value_t = 1.0)]
+    probability: f32,
 }
 
 fn main() {
@@ -24,9 +29,12 @@ fn main() {
 
     // Get side length
     let side_length = args.len_sides;
-    
+
     // Get number of grains to start with
     let num_grains = args.num_grains;
+
+    // get probability paramter
+    let probability = args.probability;
 
     // find middle of the grid
     let middle_point = (side_length - 1) / 2;
@@ -36,6 +44,18 @@ fn main() {
 
     // create sandtower in the middle of grid
     s.set_value_at(num_grains, (middle_point, middle_point));
+
+    // set probability
+    match s.set_probailitiy(probability) {
+        Err(e) => {
+            eprintln!("{}", e);
+            eprintln!("Probability value must be between 0.0 and 1.0!");
+            eprintln!("Exiting program!");
+            process::exit(0)
+        }
+
+        Ok(()) => (),
+    }
 
     // topple until finished
     while !s.is_completely_toppled {

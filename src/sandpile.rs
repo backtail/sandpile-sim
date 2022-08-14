@@ -1,10 +1,13 @@
+use clap::ErrorKind;
 use colored::Colorize;
+use rand::{self, Rng};
 use toodee::TooDee;
 
 pub struct Sandpile {
-    pub x: usize,
-    pub y: usize,
+    x: usize,
+    y: usize,
     pub cells: TooDee<usize>,
+    probability_to_topple: f32,
     pub is_completely_toppled: bool,
 }
 
@@ -13,10 +16,12 @@ impl Sandpile {
         // first and last rows are "invisible" to make computations easier
         let x_offseted = x + 2;
         let y_offseted = y + 2;
+
         Sandpile {
             x: x_offseted,
             y: y_offseted,
             cells: TooDee::init(x_offseted, y_offseted, 0),
+            probability_to_topple: 1.0,
             is_completely_toppled: false,
         }
     }
@@ -58,37 +63,107 @@ impl Sandpile {
         self.cells[adjusted_coordinates] = value;
     }
 
+    pub fn set_probailitiy(&mut self, value: f32) -> Result<(), ErrorKind> {
+        match value {
+            x if x <= 0.0 => {
+                self.probability_to_topple = 0.001;
+                Err(ErrorKind::ValueValidation)
+            }
+
+            x if x > 0.0 && x <= 1.0 => {
+                self.probability_to_topple = value;
+                Ok(())
+            }
+
+            _ => {
+                self.probability_to_topple = 1.0;
+                Err(ErrorKind::ValueValidation)
+            }
+        }
+    }
+
     pub fn topple_sandpile(&mut self) {
         let mut been_toppled = false;
-        for i in 1..(self.x - 1) {
-            for j in 1..(self.y - 1) {
-                // most efficitient algorithm for big piles
-                if self.cells[(i, j)] >= 8 {
-                    let multiples = self.cells[(i, j)] / 4;
 
-                    // reduce pile that's too big
-                    self.cells[(i, j)] -= 4 * multiples;
-                    been_toppled = true;
-                    // move grains to neighbouring cells
-                    self.cells[(i - 1, j)] += multiples;
-                    self.cells[(i, j - 1)] += multiples;
-                    self.cells[(i + 1, j)] += multiples;
-                    self.cells[(i, j + 1)] += multiples;
+        // use old algorithm if probability is 1 since it is way more effecient
+        if self.probability_to_topple == 1.0 {
+            for i in 1..(self.x - 1) {
+                for j in 1..(self.y - 1) {
+                    // most efficitient algorithm for big piles
+                    if self.cells[(i, j)] >= 8 {
+                        let multiples = self.cells[(i, j)] / 4;
+
+                        // reduce pile that's too big
+                        self.cells[(i, j)] -= 4 * multiples;
+                        been_toppled = true;
+                        // move grains to neighbouring cells
+                        self.cells[(i - 1, j)] += multiples;
+                        self.cells[(i, j - 1)] += multiples;
+                        self.cells[(i + 1, j)] += multiples;
+                        self.cells[(i, j + 1)] += multiples;
+                    }
+
+                    // less division and multiplication for small piles
+                    if self.cells[(i, j)] > 3 && self.cells[(i, j)] < 8 {
+                        // reduce pile that's too big
+                        self.cells[(i, j)] -= 4;
+                        been_toppled = true;
+                        // move grains to neighbouring cells
+                        self.cells[(i - 1, j)] += 1;
+                        self.cells[(i, j - 1)] += 1;
+                        self.cells[(i + 1, j)] += 1;
+                        self.cells[(i, j + 1)] += 1;
+                    }
                 }
+            }
+        } else {
+            // create a random number tread for this topple stage
+            let mut rng = rand::thread_rng();
 
-                // less division and multiplication for small piles
-                if self.cells[(i, j)] > 3 && self.cells[(i, j)] < 8 {
-                    // reduce pile that's too big
-                    self.cells[(i, j)] -= 4;
-                    been_toppled = true;
-                    // move grains to neighbouring cells
-                    self.cells[(i - 1, j)] += 1;
-                    self.cells[(i, j - 1)] += 1;
-                    self.cells[(i + 1, j)] += 1;
-                    self.cells[(i, j + 1)] += 1;
+            for i in 1..(self.x - 1) {
+                for j in 1..(self.y - 1) {
+                    if self.cells[(i, j)] > 3 {
+                        // count how many grains have been moved
+                        let mut moved_grain_counter: usize = 0;
+
+                        // create random number between 0 and 1
+                        // when the random number is higher than the probability threshold, dont't move sandgrain
+                        let random: [f32; 4] = rng.gen();
+
+                        // move grains to neighbouring cells if threshold is not met
+                        for counter in 0..random.len() {
+                            if random[counter] < self.probability_to_topple {
+                                match counter {
+                                    0 => {
+                                        self.cells[(i - 1, j)] += 1;
+                                    }
+                                    1 => {
+                                        self.cells[(i, j - 1)] += 1;
+                                    }
+                                    2 => {
+                                        self.cells[(i + 1, j)] += 1;
+                                    }
+                                    3 => {
+                                        self.cells[(i, j + 1)] += 1;
+                                    }
+                                    _ => (),
+                                }
+                                moved_grain_counter += 1;
+                            }
+                        }
+
+                        // reduce grains that have been moved
+                        self.cells[(i, j)] -= moved_grain_counter;
+
+                        // even if no grains have been moved
+                        // with really low probability values it could take a few passes until a grain will be moved
+                        // setting this bool to true means piles with more than 3 grains have been found
+                        been_toppled = true;
+                    }
                 }
             }
         }
+
         if !been_toppled {
             self.is_completely_toppled = true;
         }
@@ -101,5 +176,36 @@ impl Sandpile {
             }
         }
         self.is_completely_toppled = false;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Sandpile;
+    use clap::ErrorKind;
+
+    #[test]
+    fn probability() {
+        let mut s = Sandpile::new(0, 0);
+
+        // make sure probability is 1.0 when a sandpile is created
+        assert_eq!(s.probability_to_topple, 1.0);
+
+        // check all possible states
+        let res = s.set_probailitiy(-1.0);
+        assert_eq!(res, Err(ErrorKind::ValueValidation));
+        assert_eq!(s.probability_to_topple, 0.001);
+
+        let res = s.set_probailitiy(0.0);
+        assert_eq!(res, Err(ErrorKind::ValueValidation));
+        assert_eq!(s.probability_to_topple, 0.001);
+
+        let res = s.set_probailitiy(2.0);
+        assert_eq!(res, Err(ErrorKind::ValueValidation));
+        assert_eq!(s.probability_to_topple, 1.0);
+
+        let res = s.set_probailitiy(0.5);
+        assert_eq!(res, Ok(()));
+        assert_eq!(s.probability_to_topple, 0.5);
     }
 }
