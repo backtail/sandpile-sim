@@ -1,11 +1,13 @@
+use clap::ErrorKind;
 use colored::Colorize;
 use toodee::TooDee;
 
 pub struct Sandpile {
-    pub x: usize,
-    pub y: usize,
+    x: usize,
+    y: usize,
     pub cells: TooDee<usize>,
-    pub is_completely_toppled: bool,
+    probability_to_topple: f32,
+    is_completely_toppled: bool,
 }
 
 impl Sandpile {
@@ -13,10 +15,12 @@ impl Sandpile {
         // first and last rows are "invisible" to make computations easier
         let x_offseted = x + 2;
         let y_offseted = y + 2;
+
         Sandpile {
             x: x_offseted,
             y: y_offseted,
             cells: TooDee::init(x_offseted, y_offseted, 0),
+            probability_to_topple: 1.0,
             is_completely_toppled: false,
         }
     }
@@ -56,6 +60,25 @@ impl Sandpile {
         // offset coordinates by 1 since first row and colums are "invisible"
         let adjusted_coordinates = (coordinate.0 + 1, coordinate.1 + 1);
         self.cells[adjusted_coordinates] = value;
+    }
+
+    pub fn set_probailitiy(&mut self, value: f32) -> Result<(), ErrorKind> {
+        match value {
+            x if x <= 0.0 => {
+                self.probability_to_topple = 0.001;
+                Err(ErrorKind)
+            }
+
+            x if x > 0.0 && x <= 1.0 => {
+                self.probability_to_topple = value;
+                Ok(())
+            }
+
+            _ => {
+                self.probability_to_topple = 1.0;
+                Err(ErrorKind)
+            }
+        }
     }
 
     pub fn topple_sandpile(&mut self) {
