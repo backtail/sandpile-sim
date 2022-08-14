@@ -1,4 +1,7 @@
+pub mod output;
 pub mod sandpile;
+
+use output::{create_png, raw_data_to_rgba};
 use sandpile::Sandpile;
 use clap::Parser;
 
@@ -39,6 +42,21 @@ fn main() {
         s.topple_sandpile();
     }
 
-    // print to console
-    s.print_sandpile();
+    // create custom file name
+    let path = format!(
+        ".\\render\\img_{}_grains_{}x{}px.png",
+        num_grains, side_length, side_length
+    );
+
+    // convert data to RGBA values from empty vector
+    let mut rgba_data: Vec<u8> = vec![];
+    raw_data_to_rgba(s.cells.data(), &mut rgba_data);
+
+    // write data to png file
+    create_png(
+        path,
+        (side_length + 2) as u32,
+        (side_length + 2) as u32,
+        rgba_data.as_slice(),
+    );
 }
