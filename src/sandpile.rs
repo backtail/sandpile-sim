@@ -7,7 +7,7 @@ pub struct Sandpile {
     y: usize,
     pub cells: TooDee<usize>,
     probability_to_topple: f32,
-    is_completely_toppled: bool,
+    pub is_completely_toppled: bool,
 }
 
 impl Sandpile {
@@ -66,7 +66,7 @@ impl Sandpile {
         match value {
             x if x <= 0.0 => {
                 self.probability_to_topple = 0.001;
-                Err(ErrorKind)
+                Err(ErrorKind::ValueValidation)
             }
 
             x if x > 0.0 && x <= 1.0 => {
@@ -76,7 +76,7 @@ impl Sandpile {
 
             _ => {
                 self.probability_to_topple = 1.0;
-                Err(ErrorKind)
+                Err(ErrorKind::ValueValidation)
             }
         }
     }
