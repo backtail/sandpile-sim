@@ -126,3 +126,34 @@ impl Sandpile {
         self.is_completely_toppled = false;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Sandpile;
+    use clap::ErrorKind;
+
+    #[test]
+    fn probability() {
+        let mut s = Sandpile::new(0, 0);
+
+        // make sure probability is 1.0 when a sandpile is created
+        assert_eq!(s.probability_to_topple, 1.0);
+
+        // check all possible states
+        let res = s.set_probailitiy(-1.0);
+        assert_eq!(res, Err(ErrorKind::ValueValidation));
+        assert_eq!(s.probability_to_topple, 0.001);
+
+        let res = s.set_probailitiy(0.0);
+        assert_eq!(res, Err(ErrorKind::ValueValidation));
+        assert_eq!(s.probability_to_topple, 0.001);
+
+        let res = s.set_probailitiy(2.0);
+        assert_eq!(res, Err(ErrorKind::ValueValidation));
+        assert_eq!(s.probability_to_topple, 1.0);
+
+        let res = s.set_probailitiy(0.5);
+        assert_eq!(res, Ok(()));
+        assert_eq!(s.probability_to_topple, 0.5);
+    }
+}
