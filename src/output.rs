@@ -2,7 +2,7 @@ use png;
 use std::fs::File;
 use std::io::BufWriter;
 
-pub fn create_png(path: String, width: u32, height: u32, data: &[u8]) {
+pub fn create_png(path: &str, width: u32, height: u32, data: &[u8]) {
     let file = File::create(path).unwrap();
     let ref mut w = BufWriter::new(file);
 

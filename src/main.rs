@@ -4,6 +4,7 @@ pub mod sandpile;
 use clap::Parser;
 use output::{create_png, raw_data_to_rgba};
 use sandpile::Sandpile;
+use std::path::PathBuf;
 use std::process;
 
 // Structure representing the command line arguments
@@ -62,11 +63,19 @@ fn main() {
         s.topple_sandpile();
     }
 
+    // OS unspecific path
+    let mut path = PathBuf::new();
+    path.push(r".");
+    path.push("render");
+
     // create custom file name
-    let path = format!(
-        ".\\render\\img_{}_grains_{}x{}px.png",
-        num_grains, side_length, side_length
+    let file_name = format!(
+        "img_{}_grains_{}x{}px_probability_{}.png",
+        num_grains, side_length, side_length, probability
     );
+
+    // extend path by custom file name
+    path.push(file_name);
 
     // convert data to RGBA values from empty vector
     let mut rgba_data: Vec<u8> = vec![];
@@ -74,7 +83,7 @@ fn main() {
 
     // write data to png file
     create_png(
-        path,
+        path.to_str().unwrap(),
         (side_length + 2) as u32,
         (side_length + 2) as u32,
         rgba_data.as_slice(),
