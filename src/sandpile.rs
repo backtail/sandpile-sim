@@ -9,6 +9,8 @@ pub struct Sandpile {
     pub cells: TooDee<usize>,
     probability_to_topple: f32,
     pub is_completely_toppled: bool,
+    pub num_steps: usize,
+    pub num_topples: usize,
 }
 
 impl Sandpile {
@@ -23,13 +25,15 @@ impl Sandpile {
             cells: TooDee::init(x_offseted, y_offseted, 0),
             probability_to_topple: 1.0,
             is_completely_toppled: false,
+            num_steps: 0,
+            num_topples: 0,
         }
     }
 
     pub fn print_sandpile(&self) {
         // every cell but the "invisible" ones
-        for i in 1..(self.x - 1) {
-            for j in 1..(self.y - 1) {
+        for i in 0..(self.x - 0) {
+            for j in 0..(self.y - 0) {
                 let value = self.cells[(i, j)];
                 let output_string;
                 match value {
@@ -82,6 +86,30 @@ impl Sandpile {
         }
     }
 
+    pub fn topple(&mut self, value: usize, x: usize, y: usize) {
+        // increase step count
+        self.num_steps += 1;
+        if x <= self.x - 1 && y <= self.y - 1 {
+            // add topple amount
+            self.cells[(x, y)] += value;
+
+            if self.cells[(x, y)] >= 4 {
+                // increase topples count
+                self.num_topples += 1;
+
+                let multiples = self.cells[(x, y)] / 4;
+                self.cells[(x, y)] -= 4 * multiples;
+
+                self.topple(multiples, x - 1, y);
+                self.topple(multiples, x, y - 1);
+                self.topple(multiples, x + 1, y);
+                self.topple(multiples, x, y + 1);
+            }
+
+            self.is_completely_toppled = true;
+        }
+    }
+
     pub fn topple_sandpile(&mut self) {
         let mut been_toppled = false;
 
@@ -89,8 +117,14 @@ impl Sandpile {
         if self.probability_to_topple == 1.0 {
             for i in 1..(self.x - 1) {
                 for j in 1..(self.y - 1) {
+                    // increase step count
+                    self.num_steps += 1;
+
                     // most efficitient algorithm for big piles
                     if self.cells[(i, j)] >= 8 {
+                        // increase topples count
+                        self.num_topples += 1;
+
                         let multiples = self.cells[(i, j)] / 4;
 
                         // reduce pile that's too big
@@ -105,6 +139,9 @@ impl Sandpile {
 
                     // less division and multiplication for small piles
                     if self.cells[(i, j)] > 3 && self.cells[(i, j)] < 8 {
+                        // increase topples count
+                        self.num_topples += 1;
+
                         // reduce pile that's too big
                         self.cells[(i, j)] -= 4;
                         been_toppled = true;
