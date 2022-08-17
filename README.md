@@ -22,3 +22,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Run the program in release mode and enjoy the patterns!
 
+### Create gifs
+
+![gif_render](gif/img_50000_grains_175x175px_30_frames.gif)
+
