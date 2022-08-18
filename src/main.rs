@@ -17,7 +17,7 @@ struct Args {
     num_grains: usize,
 
     // image side length
-    #[clap(short, long, value_parser, default_value_t = 50)]
+    #[clap(short, long, value_parser, default_value_t = 170)]
     len_sides: usize,
 
     // probability parameter
@@ -46,7 +46,7 @@ fn main() {
 
     // topple until finished
     while !s.is_completely_toppled {
-        s.topple(0, middle_point + 1, middle_point + 1);
+        s.topple_torus(0, middle_point + 1, middle_point + 1);
     }
 
     println!(

@@ -87,9 +87,18 @@ impl Sandpile {
     }
 
     pub fn topple(&mut self, value: usize, x: usize, y: usize) {
+        let x_compare = x as isize;
+        let y_compare = y as isize;
+        let x_max = (self.x - 1) as isize;
+        let y_max = (self.y - 1) as isize;
+
         // increase step count
         self.num_steps += 1;
-        if x <= self.x - 1 && y <= self.y - 1 {
+        if x_compare + 1 <= x_max
+            && y_compare + 1 <= y_max
+            && x_compare - 1 >= 0
+            && y_compare - 1 >= 0
+        {
             // add topple amount
             self.cells[(x, y)] += value;
 
@@ -108,6 +117,52 @@ impl Sandpile {
 
             self.is_completely_toppled = true;
         }
+    }
+
+    pub fn topple_torus(&mut self, value: usize, x: usize, y: usize) {
+        let x_max = self.x - 1;
+        let y_max = self.y - 1;
+
+        // increase step count
+        self.num_steps += 1;
+
+        // add topple amount
+        self.cells[(x, y)] += value;
+
+        if self.cells[(x, y)] >= 4 {
+            // increase topples count
+            self.num_topples += 1;
+
+            let multiples = self.cells[(x, y)] / 4;
+            self.cells[(x, y)] -= 4 * multiples;
+
+            // check bound and wrap around if at border
+            if x == 0 {
+                self.topple_torus(multiples, x_max, y);
+            } else {
+                self.topple_torus(multiples, x - 1, y);
+            }
+
+            if y == 0 {
+                self.topple_torus(multiples, x, y_max);
+            } else {
+                self.topple_torus(multiples, x, y - 1);
+            }
+
+            if x == x_max {
+                self.topple_torus(multiples, 0, y);
+            } else {
+                self.topple_torus(multiples, x + 1, y);
+            }
+
+            if y == y_max {
+                self.topple_torus(multiples, x, 0)
+            } else {
+                self.topple_torus(multiples, x, y + 1);
+            }
+        }
+
+        self.is_completely_toppled = true;
     }
 
     pub fn topple_sandpile(&mut self) {
