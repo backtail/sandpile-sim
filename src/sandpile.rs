@@ -62,9 +62,7 @@ impl Sandpile {
     }
 
     pub fn set_value_at(&mut self, value: usize, coordinate: (usize, usize)) {
-        // offset coordinates by 1 since first row and colums are "invisible"
-        let adjusted_coordinates = (coordinate.0 + 1, coordinate.1 + 1);
-        self.cells[adjusted_coordinates] = value;
+        self.cells[(coordinate)] = value;
     }
 
     pub fn set_probailitiy(&mut self, value: f32) -> Result<(), ErrorKind> {
@@ -251,6 +249,60 @@ impl Sandpile {
                         // with really low probability values it could take a few passes until a grain will be moved
                         // setting this bool to true means piles with more than 3 grains have been found
                         been_toppled = true;
+                    }
+                }
+            }
+        }
+
+        if !been_toppled {
+            self.is_completely_toppled = true;
+        }
+    }
+
+    pub fn topple_torus_naive(&mut self) {
+        let mut been_toppled = false;
+
+        // use old algorithm if probability is 1 since it is way more effecient
+        if self.probability_to_topple == 1.0 {
+            for i in 0..self.x {
+                for j in 0..self.y {
+                    // increase step count
+                    self.num_steps += 1;
+
+                    // most efficitient algorithm for big piles
+                    if self.cells[(i, j)] >= 4 {
+                        // increase topples count
+                        self.num_topples += 1;
+
+                        let multiples = self.cells[(i, j)] / 4;
+
+                        // reduce pile that's too big
+                        self.cells[(i, j)] -= 4 * multiples;
+                        been_toppled = true;
+
+                        if i == 0 {
+                            self.cells[(self.x - 1, j)] += multiples;
+                        } else {
+                            self.cells[(i - 1, j)] += multiples;
+                        }
+
+                        if j == 0 {
+                            self.cells[(i, self.y - 1)] += multiples;
+                        } else {
+                            self.cells[(i, j - 1)] += multiples;
+                        }
+
+                        if i == self.x - 1 {
+                            self.cells[(0, j)] += multiples;
+                        } else {
+                            self.cells[(i + 1, j)] += multiples;
+                        }
+
+                        if j == self.y - 1 {
+                            self.cells[(i, 0)] += multiples;
+                        } else {
+                            self.cells[(i, j + 1)] += multiples;
+                        }
                     }
                 }
             }
