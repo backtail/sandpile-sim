@@ -3,9 +3,10 @@ use colored::Colorize;
 use rand::{self, Rng};
 use toodee::TooDee;
 
+#[derive(Debug, Clone)]
 pub struct Sandpile {
-    x: usize,
-    y: usize,
+    pub x: usize,
+    pub y: usize,
     pub cells: TooDee<usize>,
     probability_to_topple: f32,
     pub is_completely_toppled: bool,
@@ -16,8 +17,8 @@ pub struct Sandpile {
 impl Sandpile {
     pub fn new(x: usize, y: usize) -> Self {
         // first and last rows are "invisible" to make computations easier
-        let x_offseted = x + 2;
-        let y_offseted = y + 2;
+        let x_offseted = x;
+        let y_offseted = y;
 
         Sandpile {
             x: x_offseted,

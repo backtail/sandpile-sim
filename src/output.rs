@@ -42,23 +42,23 @@ pub fn raw_data_to_rgba(input_data: &[usize], output_data: &mut Vec<u8>) {
     for i in 0..input_data.len() {
         match input_data[i] as usize {
             0 => {
-                // invisible
-                output_data.push(0);
+                // black
+                output_data.push(64);
                 output_data.push(0);
                 output_data.push(0);
                 output_data.push(255);
             }
             1 => {
                 // blue
+                output_data.push(128);
                 output_data.push(0);
                 output_data.push(0);
-                output_data.push(255);
                 output_data.push(255);
             }
             2 => {
                 // green
+                output_data.push(190);
                 output_data.push(0);
-                output_data.push(255);
                 output_data.push(0);
                 output_data.push(255)
             }

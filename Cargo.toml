@@ -12,4 +12,5 @@ clap = { version = "3.2.17", features = ["derive"] }
 png = "0.17.5"
 gif = "0.11.4"
 rand = "0.8.5"
+speedy2d = "1.7.0"
 
